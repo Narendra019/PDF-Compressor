@@ -1,0 +1,88 @@
+from __future__ import print_function
+import os
+import subprocess
+import shutil
+from tkinter import Tk
+from tkinter import *
+from tkinter import ttk
+from tkinter import filedialog
+
+class MySecondGUI:
+     def __init__(self, master):
+        self.widget(master)
+     
+     def widget(self, master):
+        master.title("PDF COMPRESSOR")
+        master.geometry("750x60")
+        master.configure(bg='cyan')
+        master.resizable(0,0)
+        self.Gui1(master)
+        # os.chdir(r'C:\Users\Narendra Chowdary\Desktop\hh')
+        
+     def Gui1(self,master):
+         
+        self.folder =StringVar()
+        self.Entry1= Entry(master,textvariable=self.folder,font=('Helvetica',11,'bold'),background = 'light cyan', borderwidth = 1.5, relief = "groove")
+        self.Entry1.place(relwidth=0.60,relheight=0.50,relx=0.01,rely=0.2)
+        
+        self.select_button =Button(master, text="SelectFolder",bg="sea green1",width=20,font=('calbiri',16),foreground='black',command=lambda:self.select(master))
+        self.select_button.place(relwidth=0.18,relheight=0.50,relx=0.62,rely=0.2)
+        
+        self.compress_button =Button(master, text="Compress",bg="sea green1",width=20,font=('calbiri',16),foreground='black',command=lambda:self.comp(master))
+        self.compress_button.place(relwidth=0.18,relheight=0.50,relx=0.81,rely=0.2)
+        
+     def select(self,master):
+        try:
+            self.file= filedialog.askopenfile()
+            self.folder_selected=os.path.dirname(self.file.name)
+            self.folder.set(self.folder_selected)
+            self.destination=self.folder_selected +"/Compress"
+            print(self.destination)
+            # os.mkdir(dirName)
+            # print(self.ext)
+        except:
+            pass
+        
+     def comp(self,master):
+        os.chdir(self.folder_selected)
+        try:
+          os.mkdir("Compress")
+        except (FileExistsError,PermissionError):
+          shutil.rmtree("Compress")
+          os.mkdir("Compress")
+          
+        for root,dirs,files in os.walk(self.folder_selected):
+            # print(root)
+            # print(dirs)
+            # print(files)
+                for file in files:
+                    if file.endswith(".pdf"):
+                        filename = os.path.join(root, file)
+                        # print (file)
+                        # print(root)
+                        
+                        arg1= '-sOutputFile=' + "c"+ file #added a c to the filename\
+                        arg2="c"+ file
+                        p = subprocess.Popen(['C:\\Program Files\\gs\\gs9.53.3\\bin\\gswin64c.exe',
+                                              '-sDEVICE=pdfwrite', 
+                                              '-dCompressMode=3',
+                                              '-dCompressFonts=true '
+                                              '-dCompatibilityLevel=1.7', 
+                                               '-dEmbedAllFonts=true',
+                                              '-dPDFSETTINGS=/ebook', '-dNOPAUSE', 
+                                              '-dBATCH', '-dQUIET', str(arg1), filename],stdout=subprocess.PIPE,shell=True)
+                        # print(os.getcwd())
+                        print(p.communicate())
+            # os.remove("Compress")
+        try:
+          for f in os.listdir(self.folder_selected):
+            if f.endswith(".pdf"):
+                shutil.move(f,self.destination)
+        except(PermissionError):
+            pass
+            
+
+if __name__ == '__main__':
+    root = Tk()
+    my_gui=MySecondGUI(root)
+    root.mainloop()
